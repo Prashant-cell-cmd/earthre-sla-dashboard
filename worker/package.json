@@ -1,0 +1,16 @@
+{
+  "name": "earthre-sla-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "db:create": "wrangler d1 create earthre-sla",
+    "db:migrate": "wrangler d1 execute earthre-sla --remote --file=schema.sql",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "latest",
+    "wrangler": "latest",
+    "typescript": "latest"
+  }
+}
