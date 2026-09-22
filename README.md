@@ -1,68 +1,310 @@
-# EarthRe SLA Monitoring Dashboard
+# \# EarthRe SLA Monitoring Dashboard
 
-A full-stack take-home implementation for the EarthRe Full Stack Engineer case study.
+# 
 
-## Architecture
+# A full-stack monitoring dashboard built for the EarthRe Full Stack Engineer case study.
 
-- **Frontend:** React + Vite, deployed as a static site (Cloudflare Pages).
-- **API / processing:** Cloudflare Worker. CSV uploads are parsed, timestamps normalized, latency converted to milliseconds, invalid latency handled, unknown status codes flagged, and duplicate rows ignored.
-- **Persistence:** Cloudflare D1 (SQLite).
-- **Flow:** Upload UI → Worker → validation/cleaning → D1 → stats/log APIs → dashboard.
+# 
 
-This keeps processing stateless: the Worker does not depend on local files or in-memory state after the request completes.
+# \## Live Demo
 
-## Data findings
+# 
 
-The supplied datasets contain mixed ISO timestamps and Unix-second timestamps; both are normalized to UTC ISO-8601. Latency uses both milliseconds and seconds; seconds are converted to milliseconds. Latency is sometimes missing and one negative latency appears in each supplied dataset; missing/negative/non-finite latency is stored as NULL rather than deleting the whole check. Exact duplicate rows occur and are ignored using a deterministic fingerprint. Status 999 appears once per dataset and is retained but marked invalid/unknown. HTTP 500/502/503 are retained as failed checks.
+# \*\*Frontend:\*\*
 
-## Availability assumption
+# https://earthre-sla-dashboard-bgj.pages.dev
 
-Availability is calculated as `successful HTTP 200 checks / all stored checks × 100`. Status 999 is retained for auditability but excluded from the successful numerator. 500/502/503 count as failed checks. This is an application-level health-check availability metric, not a provider billing-credit calculation.
+# 
 
-## Stats
+# \*\*API:\*\*
 
-The dashboard shows availability, total checks, successful/failed/invalid checks, average latency, and P95 latency. These were selected because they are useful to on-call/support/billing users while remaining explainable from the supplied data.
+# https://earthre-sla-api.prashant-earthre-sla.workers.dev
 
-## Local development
+# 
 
-### Worker
+# \*\*GitHub:\*\*
 
-```bash
-cd worker
-npm install
-npx wrangler login
-npx wrangler d1 create earthre-sla
-# Copy the returned database_id into wrangler.toml
-npx wrangler d1 execute earthre-sla --remote --file=schema.sql
-npm run dev
-```
+# https://github.com/Prashant-cell-cmd/earthre-sla-dashboard
 
-### Web
+# 
 
-```bash
-cd web
-npm install
-# Windows PowerShell
-$env:VITE_API_URL="http://localhost:8787"
-npm run dev
-```
+# \## Overview
 
-## Deployment
+# 
 
-1. Create the D1 database and apply `schema.sql`.
-2. Put the returned D1 database ID in `worker/wrangler.toml`.
-3. Run `npm run deploy` from `worker` and note the Worker URL.
-4. Set `VITE_API_URL` to the Worker URL when building the web app.
-5. Deploy `web/dist` to Cloudflare Pages.
+# The application processes monitoring-check CSV files, validates and normalizes the data, stores the records in Cloudflare D1, and provides a dashboard for monitoring availability, latency, failures, invalid records, and detailed logs.
 
-## Out of scope
+# 
 
-Authentication, user accounts, multi-tenancy, and CI pipelines are intentionally excluded as required by the assignment.
+# \### Data Flow
 
-## With more time
+# 
 
-I would add paginated logs, service-level filtering, a small chart for availability/latency over time, stronger schema validation, upload audit metadata, automated tests, and a more sophisticated CSV parser/library if the platform limits allowed it.
+# ```text
 
-## Live verification
+# CSV Upload
 
-Update this section immediately before submission with the deployed frontend URL, Worker URL, and the date/time they were last verified.
+# &#x20;   ↓
+
+# React Dashboard
+
+# &#x20;   ↓
+
+# Cloudflare Worker API
+
+# &#x20;   ↓
+
+# Validation \& Normalization
+
+# &#x20;   ↓
+
+# Cloudflare D1
+
+# &#x20;   ↓
+
+# Statistics \& Logs APIs
+
+# &#x20;   ↓
+
+# Monitoring Dashboard
+
+# ```
+
+# 
+
+# \## Architecture
+
+# 
+
+# \### Frontend
+
+# 
+
+# \* React
+
+# \* TypeScript
+
+# \* Vite
+
+# \* Cloudflare Pages
+
+# 
+
+# The frontend provides:
+
+# 
+
+# \* CSV upload
+
+# \* Summary statistics
+
+# \* Availability percentage
+
+# \* Average latency
+
+# \* P95 latency
+
+# \* Success / failed / invalid counts
+
+# \* Date and date-range filtering
+
+# \* Monitoring logs table
+
+# 
+
+# \### Backend
+
+# 
+
+# \* Cloudflare Workers
+
+# \* TypeScript
+
+# \* REST API
+
+# 
+
+# The Worker handles:
+
+# 
+
+# \* CSV parsing
+
+# \* Input validation
+
+# \* Timestamp normalization
+
+# \* Latency normalization
+
+# \* Status-code classification
+
+# \* Duplicate detection
+
+# \* Database insertion
+
+# \* Statistics calculation
+
+# \* Log retrieval
+
+# 
+
+# \### Database
+
+# 
+
+# \* Cloudflare D1
+
+# \* SQLite-compatible SQL database
+
+# 
+
+# The database stores:
+
+# 
+
+# \* Service information
+
+# \* Timestamp
+
+# \* HTTP status code
+
+# \* Latency in milliseconds
+
+# \* Agent
+
+# \* Region
+
+# \* Validity status
+
+# \* Deterministic fingerprint
+
+# \* Record creation time
+
+# 
+
+# \## Data Cleaning \& Quality Findings
+
+# 
+
+# The supplied monitoring datasets contain several data-quality issues.
+
+# 
+
+# \### Timestamp normalization
+
+# 
+
+# The datasets contain both:
+
+# 
+
+# \* ISO timestamp values
+
+# \* Unix timestamp values
+
+# 
+
+# Both formats are normalized to UTC ISO-8601 timestamps before storage.
+
+# 
+
+# \### Latency normalization
+
+# 
+
+# Latency values can use different units.
+
+# 
+
+# \* Milliseconds are stored directly.
+
+# \* Seconds are converted to milliseconds.
+
+# \* Missing latency values are stored as `NULL`.
+
+# \* Negative latency values are treated as invalid and stored as `NULL`.
+
+# \* Non-finite latency values are also stored as `NULL`.
+
+# 
+
+# \### Status codes
+
+# 
+
+# The application handles:
+
+# 
+
+# \* `200` → successful check
+
+# \* `500`, `502`, `503` → failed check
+
+# \* `999` → invalid / unknown status
+
+# 
+
+# Invalid records are retained for auditability rather than silently deleted.
+
+# 
+
+# \### Duplicate records
+
+# 
+
+# Exact duplicate records occur in the supplied datasets.
+
+# 
+
+# A deterministic fingerprint is generated for each record, and the database uses a unique constraint to prevent duplicate storage.
+
+# 
+
+# \## Availability Calculation
+
+# 
+
+# Availability is calculated as:
+
+# 
+
+# ```text
+
+# successful HTTP 200 checks
+
+# \-------------------------------- × 100
+
+# all stored checks
+
+# ```
+
+# 
+
+# Status `999` records are retained but are not counted as successful checks.
+
+# 
+
+# HTTP `500`, `502`, and `503` are counted as failed checks.
+
+# 
+
+# This is an application-level monitoring availability metric and not a provider billing-credit calculation.
+
+# 
+
+# \## Final Production Data
+
+# 
+
+# All five supplied monitoring datasets were uploaded successfully.
+
+# 
+
+# | Dataset | Received | Inserted | Duplicates | Rejected |
+
+# | ------- | -------: | -------: | ---------: | -------: |
+
+# | 9-day   |          |          |            |          |
+
+
+
