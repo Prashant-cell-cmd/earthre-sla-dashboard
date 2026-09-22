@@ -5,4 +5,4 @@ compatibility_date = "2026-09-21"
 [[d1_databases]]
 binding = "DB"
 database_name = "earthre-sla"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "033656f2-6371-49cb-9d85-13934bd85b61"

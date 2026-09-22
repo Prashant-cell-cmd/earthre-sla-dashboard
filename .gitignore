@@ -3,3 +3,5 @@ dist/
 .wrangler/
 .env
 .DS_Store
+.env.production
+mnt/
